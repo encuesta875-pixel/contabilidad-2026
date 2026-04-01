@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Libro Mayor - Conta Pro')}"></head>
+<body>
+    <div class="main-container">
+        <div th:replace="~{fragments/layout :: sidebar}"></div>
+        <div class="content-wrapper">
+            <div class="content-main">
+                <div th:replace="~{fragments/layout :: navbar('Libro Mayor', 'Contabilidad / Libro Mayor')}"></div>
+
+                <!-- Filtros -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <form method="get" action="/libro-mayor" style="display: flex; gap: 16px; align-items: end; flex-wrap: wrap;">
+                        <div style="flex: 2; min-width: 300px;">
+                            <label class="form-label">Cuenta Contable</label>
+                            <select name="cuentaId" class="form-input" required>
+                                <option value="">Seleccione una cuenta...</option>
+                                <option th:each="cuenta : ${cuentasDisponibles}"
+                                        th:value="${cuenta.id}"
+                                        th:text="${cuenta.codigo + ' - ' + cuenta.nombre}"
+                                        th:selected="${cuentaSeleccionada != null && cuenta.id == cuentaSeleccionada.id}">
+                                    1105 - Caja General
+                                </option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <label class="form-label">Fecha Inicio</label>
+                            <input type="date" name="fechaInicio" class="form-input"
+                                   th:value="${fechaInicio}" required>
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <label class="form-label">Fecha Fin</label>
+                            <input type="date" name="fechaFin" class="form-input"
+                                   th:value="${fechaFin}" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <svg style="width: 18px; height: 18px; margin-right: 8px;" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+                            </svg>
+                            Consultar
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="exportarPDF()"
+                                th:disabled="${cuentaSeleccionada == null}">
+                            <svg style="width: 18px; height: 18px; margin-right: 8px;" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd"/>
+                            </svg>
+                            Exportar PDF
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Información de la cuenta seleccionada -->
+                <div th:if="${cuentaSeleccionada != null}" class="card" style="margin-bottom: 24px; background: linear-gradient(135deg, rgba(0, 43, 73, 0.05) 0%, rgba(74, 144, 226, 0.05) 100%); border-left: 4px solid var(--primary);">
+                    <div style="display: flex; gap: 24px; align-items: center; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">CUENTA</div>
+                            <div style="font-size: 20px; font-weight: 700; color: var(--primary);">
+                                <span th:text="${cuentaSeleccionada.codigo}">1105</span> -
+                                <span th:text="${cuentaSeleccionada.nombre}">Caja General</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">TIPO</div>
+                            <span class="badge" th:classappend="${cuentaSeleccionada.tipo == 'ACTIVO' ? 'badge-primary' :
+                                                                  cuentaSeleccionada.tipo == 'PASIVO' ? 'badge-warning' :
+                                                                  cuentaSeleccionada.tipo == 'PATRIMONIO' ? 'badge-secondary' :
+                                                                  cuentaSeleccionada.tipo == 'INGRESO' ? 'badge-success' : 'badge-danger'}"
+                                  th:text="${cuentaSeleccionada.tipo}">ACTIVO</span>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">NATURALEZA</div>
+                            <span class="badge" th:classappend="${cuentaSeleccionada.naturaleza == 'DEBITO' ? 'badge-success' : 'badge-danger'}"
+                                  th:text="${cuentaSeleccionada.naturaleza}">DEBITO</span>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">NIVEL</div>
+                            <div style="font-size: 18px; font-weight: 600;" th:text="${cuentaSeleccionada.nivel}">3</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estadísticas -->
+                <div th:if="${cuentaSeleccionada != null}" class="stats-grid" style="margin-bottom: 24px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                    <div class="card card-stat">
+                        <div class="card-stat-icon" style="background: rgba(80, 227, 194, 0.1);">
+                            <svg style="width: 24px; height: 24px; color: var(--income);" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="card-stat-label">Total Débitos</div>
+                            <div class="card-stat-value text-income">
+                                $<span th:text="${#numbers.formatDecimal(totalDebitos, 1, 'COMMA', 0, 'POINT')}">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-stat">
+                        <div class="card-stat-icon" style="background: rgba(208, 2, 27, 0.1);">
+                            <svg style="width: 24px; height: 24px; color: var(--expense);" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9a1 1 0 000 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="card-stat-label">Total Créditos</div>
+                            <div class="card-stat-value text-expense">
+                                $<span th:text="${#numbers.formatDecimal(totalCreditos, 1, 'COMMA', 0, 'POINT')}">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-stat">
+                        <div class="card-stat-icon" style="background: rgba(74, 144, 226, 0.1);">
+                            <svg style="width: 24px; height: 24px; color: var(--secondary);" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="card-stat-label">Saldo Final</div>
+                            <div class="card-stat-value"
+                                 th:classappend="${saldoFinal >= 0 ? 'text-income' : 'text-expense'}">
+                                $<span th:text="${#numbers.formatDecimal(saldoFinal, 1, 'COMMA', 0, 'POINT')}">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-stat">
+                        <div class="card-stat-icon" style="background: rgba(144, 19, 254, 0.1);">
+                            <svg style="width: 24px; height: 24px; color: var(--info);" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="card-stat-label">Total Movimientos</div>
+                            <div class="card-stat-value" style="color: var(--text-primary);" th:text="${#lists.size(movimientos)}">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de movimientos -->
+                <div class="card" th:if="${cuentaSeleccionada != null}">
+                    <div style="overflow-x: auto;">
+                        <table class="table" th:if="${not #lists.isEmpty(movimientos)}">
+                            <thead>
+                                <tr>
+                                    <th style="width: 100px;">Fecha</th>
+                                    <th style="width: 80px;">Asiento</th>
+                                    <th>Concepto</th>
+                                    <th style="width: 130px; text-align: right;">Débito</th>
+                                    <th style="width: 130px; text-align: right;">Crédito</th>
+                                    <th style="width: 130px; text-align: right;">Saldo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${saldoInicial != 0}">
+                                    <td colspan="5" style="text-align: right; font-weight: 600; background: var(--bg-light);">
+                                        SALDO INICIAL:
+                                    </td>
+                                    <td style="text-align: right; font-weight: 700; background: var(--bg-light);"
+                                        th:classappend="${saldoInicial >= 0 ? 'text-income' : 'text-expense'}">
+                                        $<span th:text="${#numbers.formatDecimal(saldoInicial, 1, 'COMMA', 0, 'POINT')}">0</span>
+                                    </td>
+                                </tr>
+                                <tr th:each="movimiento, iterStat : ${movimientos}">
+                                    <td th:text="${#temporals.format(movimiento.asiento.fecha, 'dd/MM/yyyy')}">01/01/2024</td>
+                                    <td>
+                                        <span class="badge badge-primary"
+                                              th:text="${movimiento.asiento.numeroAsiento}">1</span>
+                                    </td>
+                                    <td th:text="${movimiento.asiento.concepto}">Concepto del asiento</td>
+                                    <td style="text-align: right; font-weight: 600;"
+                                        th:classappend="${movimiento.debito > 0 ? 'text-income' : ''}">
+                                        <span th:if="${movimiento.debito > 0}">
+                                            $<span th:text="${#numbers.formatDecimal(movimiento.debito, 1, 'COMMA', 0, 'POINT')}">0</span>
+                                        </span>
+                                        <span th:unless="${movimiento.debito > 0}">-</span>
+                                    </td>
+                                    <td style="text-align: right; font-weight: 600;"
+                                        th:classappend="${movimiento.credito > 0 ? 'text-expense' : ''}">
+                                        <span th:if="${movimiento.credito > 0}">
+                                            $<span th:text="${#numbers.formatDecimal(movimiento.credito, 1, 'COMMA', 0, 'POINT')}">0</span>
+                                        </span>
+                                        <span th:unless="${movimiento.credito > 0}">-</span>
+                                    </td>
+                                    <td style="text-align: right; font-weight: 700;" th:id="'saldo-' + ${iterStat.index}">
+                                        <!-- El saldo se calcula con JavaScript -->
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr style="font-weight: 700; background: var(--bg-light);">
+                                    <td colspan="3" style="text-align: right;">SALDO FINAL:</td>
+                                    <td style="text-align: right; color: var(--income);">
+                                        $<span th:text="${#numbers.formatDecimal(totalDebitos, 1, 'COMMA', 0, 'POINT')}">0</span>
+                                    </td>
+                                    <td style="text-align: right; color: var(--expense);">
+                                        $<span th:text="${#numbers.formatDecimal(totalCreditos, 1, 'COMMA', 0, 'POINT')}">0</span>
+                                    </td>
+                                    <td style="text-align: right; font-weight: 700;"
+                                        th:classappend="${saldoFinal >= 0 ? 'text-income' : 'text-expense'}">
+                                        $<span th:text="${#numbers.formatDecimal(saldoFinal, 1, 'COMMA', 0, 'POINT')}">0</span>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <!-- Mensaje cuando no hay movimientos -->
+                        <div th:if="${#lists.isEmpty(movimientos)}" style="text-align: center; padding: 60px 20px;">
+                            <div style="width: 80px; height: 80px; margin: 0 auto 16px; border-radius: 50%; background: rgba(74, 144, 226, 0.1); display: flex; align-items: center; justify-content: center;">
+                                <svg style="width: 40px; height: 40px; color: var(--secondary);" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <h3 style="font-size: 18px; color: var(--text-primary); margin-bottom: 8px;">
+                                No hay movimientos
+                            </h3>
+                            <p style="color: var(--text-secondary);">
+                                La cuenta seleccionada no tiene movimientos contabilizados en el periodo especificado.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mensaje inicial cuando no se ha seleccionado cuenta -->
+                <div th:if="${cuentaSeleccionada == null}" class="card" style="text-align: center; padding: 60px 40px;">
+                    <div style="width: 100px; height: 100px; margin: 0 auto 20px; border-radius: 50%; background: linear-gradient(135deg, rgba(0, 43, 73, 0.1) 0%, rgba(74, 144, 226, 0.1) 100%); display: flex; align-items: center; justify-content: center;">
+                        <svg style="width: 50px; height: 50px; color: var(--primary);" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V4a2 2 0 00-2-2H6zm1 2a1 1 0 000 2h6a1 1 0 100-2H7zm6 4a1 1 0 011 1v3a1 1 0 11-2 0V9a1 1 0 011-1zm-3 3a1 1 0 100 2h.01a1 1 0 100-2H10zm-4 1a1 1 0 011-1h.01a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h.01a1 1 0 100-2H10zm3 0a1 1 0 100 2h.01a1 1 0 100-2H13z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <h2 style="font-size: 24px; font-weight: 700; color: var(--primary); margin-bottom: 12px;">
+                        Libro Mayor
+                    </h2>
+                    <p style="font-size: 16px; color: var(--text-secondary); margin-bottom: 24px; max-width: 500px; margin: 0 auto;">
+                        Selecciona una cuenta contable para ver su detalle de movimientos, débitos, créditos y saldo.
+                    </p>
+                </div>
+
+                <div th:replace="~{fragments/layout :: footer}"></div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+
+    <script th:inline="javascript">
+        // Calcular saldo acumulado
+        document.addEventListener('DOMContentLoaded', function() {
+            const movimientos = /*[[${movimientos}]]*/ [];
+            const naturaleza = /*[[${cuentaSeleccionada?.naturaleza}]]*/ 'DEBITO';
+            const saldoInicial = /*[[${saldoInicial}]]*/ 0;
+
+            if (movimientos && movimientos.length > 0) {
+                let saldoAcumulado = saldoInicial;
+
+                movimientos.forEach((mov, index) => {
+                    const debito = mov.debito || 0;
+                    const credito = mov.credito || 0;
+
+                    // Calcular saldo según naturaleza de la cuenta
+                    if (naturaleza === 'DEBITO') {
+                        saldoAcumulado += (debito - credito);
+                    } else {
+                        saldoAcumulado += (credito - debito);
+                    }
+
+                    // Mostrar saldo con formato
+                    const saldoCell = document.getElementById('saldo-' + index);
+                    if (saldoCell) {
+                        const saldoFormateado = formatearNumero(Math.abs(saldoAcumulado));
+                        saldoCell.textContent = '$' + saldoFormateado;
+                        saldoCell.className = saldoAcumulado >= 0 ? 'text-income' : 'text-expense';
+                        saldoCell.style.textAlign = 'right';
+                        saldoCell.style.fontWeight = '700';
+                    }
+                });
+            }
+        });
+
+        function formatearNumero(numero) {
+            return numero.toLocaleString('es-CO', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        }
+
+        function exportarPDF() {
+            if (confirm('¿Desea exportar el Libro Mayor a PDF?')) {
+                const cuentaId = document.querySelector('select[name="cuentaId"]').value;
+                const fechaInicio = document.querySelector('input[name="fechaInicio"]').value;
+                const fechaFin = document.querySelector('input[name="fechaFin"]').value;
+                window.location.href = `/libro-mayor/pdf?cuentaId=${cuentaId}&fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
+            }
+        }
+    </script>
+</body>
+</html>

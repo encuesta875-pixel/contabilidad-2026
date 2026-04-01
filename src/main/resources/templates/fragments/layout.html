@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">App Contabilidad</title>
+
+    <!-- Purity UI Dashboard Styles -->
+    <link rel="stylesheet" th:href="@{/css/purity/purity-main.css}">
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" th:href="@{/css/custom.css}">
+</head>
+
+<!-- SIDEBAR FRAGMENT -->
+<div th:fragment="sidebar" class="sidebar">
+    <div class="sidebar-header">
+        <a href="/dashboard" class="sidebar-brand">
+            <img th:src="@{/svg/logo.svg}" alt="Logo" class="sidebar-brand-icon">
+            <span class="sidebar-brand-text">Contabilidad</span>
+        </a>
+    </div>
+
+    <nav class="sidebar-nav">
+        <!-- Dashboard -->
+        <div class="nav-item">
+            <a href="/dashboard" class="nav-link" th:classappend="${#strings.equals(currentPage, 'dashboard')} ? 'active'">
+                <img th:src="@{/svg/home.svg}" alt="Dashboard" class="nav-icon">
+                <span>Dashboard</span>
+            </a>
+        </div>
+
+        <div class="sidebar-separator"></div>
+
+        <!-- CONTABILIDAD CENTRAL -->
+        <div class="nav-section-title">CONTABILIDAD</div>
+
+        <div class="nav-item">
+            <a href="/plan-cuentas" class="nav-link" th:classappend="${#strings.equals(currentPage, 'plan-cuentas')} ? 'active'">
+                <img th:src="@{/svg/document.svg}" alt="Plan de Cuentas" class="nav-icon">
+                <span>Plan de Cuentas</span>
+            </a>
+        </div>
+
+        <div class="nav-item">
+            <a href="/asientos" class="nav-link" th:classappend="${#strings.equals(currentPage, 'asientos')} ? 'active'">
+                <img th:src="@{/svg/document.svg}" alt="Asientos" class="nav-icon">
+                <span>Asientos Contables</span>
+            </a>
+        </div>
+
+        <div class="nav-item">
+            <a href="/libro-diario" class="nav-link" th:classappend="${#strings.equals(currentPage, 'libro-diario')} ? 'active'">
+                <img th:src="@{/svg/document.svg}" alt="Libro Diario" class="nav-icon">
+                <span>Libro Diario</span>
+            </a>
+        </div>
+
+        <div class="nav-item">
+            <a href="/libro-mayor" class="nav-link" th:classappend="${#strings.equals(currentPage, 'libro-mayor')} ? 'active'">
+                <img th:src="@{/svg/document.svg}" alt="Libro Mayor" class="nav-icon">
+                <span>Libro Mayor</span>
+            </a>
+        </div>
+
+        <div class="sidebar-separator"></div>
+
+        <!-- ESTADOS FINANCIEROS -->
+        <div class="nav-section-title">REPORTES</div>
+
+        <div class="nav-item">
+            <a href="/balance-general" class="nav-link" th:classappend="${#strings.equals(currentPage, 'balance-general')} ? 'active'">
+                <img th:src="@{/svg/stats.svg}" alt="Balance" class="nav-icon">
+                <span>Balance General</span>
+            </a>
+        </div>
+
+        <div class="nav-item">
+            <a href="/estado-resultados" class="nav-link" th:classappend="${#strings.equals(currentPage, 'estado-resultados')} ? 'active'">
+                <img th:src="@{/svg/stats.svg}" alt="Estado Resultados" class="nav-icon">
+                <span>Estado de Resultados</span>
+            </a>
+        </div>
+
+        <div class="nav-item">
+            <a href="/flujo-efectivo" class="nav-link" th:classappend="${#strings.equals(currentPage, 'flujo-efectivo')} ? 'active'">
+                <img th:src="@{/svg/wallet.svg}" alt="Flujo Efectivo" class="nav-icon">
+                <span>Flujo de Efectivo</span>
+            </a>
+        </div>
+
+        <div class="sidebar-separator"></div>
+
+        <!-- TESORERÍA -->
+        <div class="nav-section-title">TESORERÍA</div>
+
+        <div class="nav-item">
+            <a href="/bancos" class="nav-link" th:classappend="${#strings.equals(currentPage, 'bancos')} ? 'active'">
+                <img th:src="@{/svg/credit.svg}" alt="Bancos" class="nav-icon">
+                <span>Cuentas Bancarias</span>
+            </a>
+        </div>
+
+        <div class="nav-item">
+            <a href="/conciliacion" class="nav-link" th:classappend="${#strings.equals(currentPage, 'conciliacion')} ? 'active'">
+                <img th:src="@{/svg/document.svg}" alt="Conciliación" class="nav-icon">
+                <span>Conciliación</span>
+            </a>
+        </div>
+
+        <div class="sidebar-separator"></div>
+
+        <!-- CARTERA -->
+        <div class="nav-section-title">CARTERA</div>
+
+        <div class="nav-item">
+            <a href="/cuentas-cobrar" class="nav-link" th:classappend="${#strings.equals(currentPage, 'cuentas-cobrar')} ? 'active'">
+                <img th:src="@{/svg/wallet.svg}" alt="Por Cobrar" class="nav-icon">
+                <span>Cuentas por Cobrar</span>
+            </a>
+        </div>
+
+        <div class="nav-item">
+            <a href="/cuentas-pagar" class="nav-link" th:classappend="${#strings.equals(currentPage, 'cuentas-pagar')} ? 'active'">
+                <img th:src="@{/svg/credit.svg}" alt="Por Pagar" class="nav-icon">
+                <span>Cuentas por Pagar</span>
+            </a>
+        </div>
+
+        <div class="sidebar-separator"></div>
+
+        <!-- OTROS -->
+        <div class="nav-section-title">HERRAMIENTAS</div>
+
+        <div class="nav-item">
+            <a href="/documentos" class="nav-link" th:classappend="${#strings.equals(currentPage, 'documentos')} ? 'active'">
+                <img th:src="@{/svg/document.svg}" alt="Documentos" class="nav-icon">
+                <span>Documentos</span>
+            </a>
+        </div>
+
+        <div class="nav-item">
+            <a href="/chat" class="nav-link" th:classappend="${#strings.equals(currentPage, 'chat')} ? 'active'">
+                <img th:src="@{/svg/help.svg}" alt="Chat IA" class="nav-icon">
+                <span>Chat IA</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- User Info Footer -->
+    <div class="sidebar-footer" style="padding: 20px; border-top: 1px solid var(--border-color); margin-top: auto;">
+        <div class="d-flex align-center gap-2">
+            <img th:src="@{/img/avatars/avatar1.png}" alt="User" style="width: 40px; height: 40px; border-radius: 50%;">
+            <div>
+                <div style="font-weight: 600; font-size: 14px;" sec:authentication="name">Usuario</div>
+                <a href="/logout" style="font-size: 12px; color: var(--text-secondary); text-decoration: none;">Cerrar Sesión</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- NAVBAR FRAGMENT -->
+<div th:fragment="navbar(pageTitle, breadcrumb)" class="navbar">
+    <div>
+        <div class="navbar-title" th:text="${pageTitle}">Página</div>
+        <div class="navbar-breadcrumb" th:text="${breadcrumb}">Home / Página</div>
+    </div>
+
+    <div class="navbar-actions">
+        <!-- Search -->
+        <div class="navbar-search">
+            <input type="text" placeholder="Buscar...">
+        </div>
+
+        <!-- Notifications -->
+        <button class="navbar-icon-btn" title="Notificaciones">
+            <img th:src="@{/svg/notifications.svg}" alt="Notificaciones" style="width: 20px; height: 20px;">
+        </button>
+
+        <!-- Settings -->
+        <button class="navbar-icon-btn" title="Configuración">
+            <img th:src="@{/svg/settings.svg}" alt="Configuración" style="width: 20px; height: 20px;">
+        </button>
+
+        <!-- User Profile -->
+        <a href="/perfil" class="navbar-icon-btn" title="Perfil">
+            <img th:src="@{/svg/account-circle.svg}" alt="Perfil" style="width: 20px; height: 20px;">
+        </a>
+    </div>
+</div>
+
+<!-- FOOTER FRAGMENT -->
+<footer th:fragment="footer" style="margin-top: 40px; padding: 20px 0; text-align: center; color: var(--text-secondary); font-size: 13px;">
+    <p>&copy; 2026 Sistema de Contabilidad - Colombia. Todos los derechos reservados.</p>
+</footer>
+
+<!-- SCRIPTS FRAGMENT -->
+<th:block th:fragment="scripts">
+    <script th:src="@{/js/app.js}"></script>
+</th:block>
+
+</html>

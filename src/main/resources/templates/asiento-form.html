@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Nuevo Asiento - Conta Pro')}"></head>
+<style>
+    .asiento-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+    }
+    .asiento-table th {
+        background: var(--gray-50);
+        padding: 12px;
+        text-align: left;
+        font-weight: 700;
+        font-size: 13px;
+        border-bottom: 2px solid var(--border-color);
+    }
+    .asiento-table td {
+        padding: 12px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    .asiento-table input, .asiento-table select {
+        width: 100%;
+    }
+    .totales-row {
+        background: var(--gray-50);
+        font-weight: 700;
+    }
+    .cuadre-ok {
+        color: var(--success);
+        font-weight: 700;
+    }
+    .cuadre-error {
+        color: var(--expense);
+        font-weight: 700;
+    }
+</style>
+<body>
+    <div class="main-container">
+        <div th:replace="~{fragments/layout :: sidebar}"></div>
+
+        <div class="content-wrapper">
+            <div class="content-main">
+                <div th:replace="~{fragments/layout :: navbar('Nuevo Asiento', 'Contabilidad / Asientos / Nuevo')}"></div>
+
+                <!-- Form Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Registro de Asiento Contable</h3>
+                        <p class="card-subtitle">Partida Doble: La suma de débitos debe ser igual a la suma de créditos</p>
+                    </div>
+                    <div class="card-body">
+                        <form id="asientoForm" th:action="@{/asientos/crear}" method="post">
+                            <!-- Header Info -->
+                            <div class="grid grid-cols-3" style="margin-bottom: 24px;">
+                                <div class="form-group">
+                                    <label class="form-label">Número de Asiento *</label>
+                                    <input type="number" name="numeroAsiento" class="form-control"
+                                           th:value="${asiento.numeroAsiento}" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Fecha *</label>
+                                    <input type="date" name="fecha" class="form-control"
+                                           th:value="${asiento.fecha}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Doc. Referencia</label>
+                                    <input type="text" name="documentoReferencia" class="form-control"
+                                           placeholder="Ej: Factura 1234">
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 24px;">
+                                <label class="form-label">Concepto *</label>
+                                <textarea name="concepto" class="form-control" rows="2"
+                                          placeholder="Descripción general del asiento contable" required></textarea>
+                            </div>
+
+                            <!-- Detalle Table -->
+                            <div style="background: var(--gray-50); padding: 20px; border-radius: var(--border-radius); margin-bottom: 24px;">
+                                <h4 style="margin-bottom: 16px; font-size: 16px; font-weight: 700;">Detalle del Asiento (Debe y Haber)</h4>
+
+                                <table class="asiento-table" id="detalleTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 40%;">Cuenta</th>
+                                            <th style="width: 25%;">Descripción</th>
+                                            <th style="width: 15%; text-align: right;">Débito (COP)</th>
+                                            <th style="width: 15%; text-align: right;">Crédito (COP)</th>
+                                            <th style="width: 5%;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="detalleBody">
+                                        <!-- Rows will be added dynamically -->
+                                    </tbody>
+                                    <tfoot>
+                                        <tr class="totales-row">
+                                            <td colspan="2" style="text-align: right;">TOTALES:</td>
+                                            <td style="text-align: right;" id="totalDebito">$0</td>
+                                            <td style="text-align: right;" id="totalCredito">$0</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" style="text-align: right; font-weight: 700;">DIFERENCIA:</td>
+                                            <td colspan="2" id="diferencia" style="text-align: center;">$0</td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+
+                                <button type="button" onclick="agregarLinea()" class="btn btn-secondary">
+                                    <svg style="width: 16px; height: 16px;" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Agregar Línea
+                                </button>
+                            </div>
+
+                            <!-- Actions -->
+                            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                                <a th:href="@{/asientos}" class="btn btn-secondary">Cancelar</a>
+                                <button type="submit" class="btn btn-primary" id="btnGuardar">
+                                    <svg style="width: 20px; height: 20px;" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    Guardar Asiento
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div th:replace="~{fragments/layout :: footer}"></div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        // Cuentas disponibles
+        const cuentas = /*[[${cuentas}]]*/ [];
+
+        let lineaCounter = 0;
+
+        function agregarLinea() {
+            lineaCounter++;
+            const tbody = document.getElementById('detalleBody');
+            const tr = document.createElement('tr');
+            tr.id = 'linea-' + lineaCounter;
+
+            tr.innerHTML = `
+                <td>
+                    <select name="cuentaId" class="form-control" required>
+                        <option value="">Seleccione una cuenta...</option>
+                        ${cuentas.map(c => `<option value="${c.id}">${c.codigo} - ${c.nombre}</option>`).join('')}
+                    </select>
+                </td>
+                <td>
+                    <input type="text" name="descripcionDetalle" class="form-control" placeholder="Descripción...">
+                </td>
+                <td>
+                    <input type="number" name="debito" class="form-control monto-input" step="1" min="0" value="0"
+                           style="text-align: right;" onchange="validarLinea(this); calcularTotales()">
+                </td>
+                <td>
+                    <input type="number" name="credito" class="form-control monto-input" step="1" min="0" value="0"
+                           style="text-align: right;" onchange="validarLinea(this); calcularTotales()">
+                </td>
+                <td>
+                    <button type="button" onclick="eliminarLinea(${lineaCounter})"
+                            style="background: rgba(208, 2, 27, 0.1); color: var(--expense); border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer;">
+                        ✗
+                    </button>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+            calcularTotales();
+        }
+
+        function eliminarLinea(id) {
+            const linea = document.getElementById('linea-' + id);
+            if (linea) {
+                linea.remove();
+                calcularTotales();
+            }
+        }
+
+        function validarLinea(input) {
+            const row = input.closest('tr');
+            const debito = parseFloat(row.querySelector('[name="debito"]').value) || 0;
+            const credito = parseFloat(row.querySelector('[name="credito"]').value) || 0;
+
+            // Si se está ingresando débito, limpiar crédito y viceversa
+            if (input.name === 'debito' && debito > 0) {
+                row.querySelector('[name="credito"]').value = 0;
+            } else if (input.name === 'credito' && credito > 0) {
+                row.querySelector('[name="debito"]').value = 0;
+            }
+        }
+
+        function calcularTotales() {
+            let totalDebito = 0;
+            let totalCredito = 0;
+
+            document.querySelectorAll('[name="debito"]').forEach(input => {
+                totalDebito += parseFloat(input.value) || 0;
+            });
+
+            document.querySelectorAll('[name="credito"]').forEach(input => {
+                totalCredito += parseFloat(input.value) || 0;
+            });
+
+            // Formatear totales
+            document.getElementById('totalDebito').textContent = '$' + totalDebito.toLocaleString('es-CO');
+            document.getElementById('totalCredito').textContent = '$' + totalCredito.toLocaleString('es-CO');
+
+            // Calcular diferencia
+            const diferencia = totalDebito - totalCredito;
+            const diferenciaElem = document.getElementById('diferencia');
+
+            if (Math.abs(diferencia) < 0.01 && totalDebito > 0) {
+                diferenciaElem.textContent = '✓ CUADRADO';
+                diferenciaElem.className = 'cuadre-ok';
+                document.getElementById('btnGuardar').disabled = false;
+            } else {
+                diferenciaElem.textContent = '$' + Math.abs(diferencia).toLocaleString('es-CO') +
+                                           (diferencia > 0 ? ' (sobra débito)' : ' (sobra crédito)');
+                diferenciaElem.className = 'cuadre-error';
+                if (totalDebito > 0 || totalCredito > 0) {
+                    document.getElementById('btnGuardar').disabled = true;
+                }
+            }
+        }
+
+        // Validar antes de enviar
+        document.getElementById('asientoForm').addEventListener('submit', function(e) {
+            const lineas = document.querySelectorAll('#detalleBody tr').length;
+            if (lineas === 0) {
+                e.preventDefault();
+                alert('Debe agregar al menos una línea al asiento');
+                return false;
+            }
+
+            const diferencia = document.getElementById('diferencia');
+            if (!diferencia.classList.contains('cuadre-ok')) {
+                e.preventDefault();
+                alert('El asiento debe estar cuadrado (Débito = Crédito) antes de guardarlo');
+                return false;
+            }
+        });
+
+        // Agregar 2 líneas iniciales
+        agregarLinea();
+        agregarLinea();
+        /*]]>*/
+    </script>
+</body>
+</html>

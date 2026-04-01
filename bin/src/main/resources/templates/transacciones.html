@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transacciones - CONTA</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div class="d-flex">
+        <!-- Sidebar (igual que dashboard) -->
+        <div class="sidebar bg-primary text-white p-3">
+            <div class="mb-4">
+                <div class="logo-circle-small mb-2">
+                    <span class="logo-text-small">C</span>
+                </div>
+                <h4 class="mb-0">CONTA</h4>
+            </div>
+            <nav class="nav flex-column">
+                <a class="nav-link text-white" th:href="@{/dashboard}"><i class="bi bi-speedometer2 me-2"></i> Dashboard</a>
+                <a class="nav-link text-white" th:href="@{/chat}"><i class="bi bi-chat-dots me-2"></i> Chat IA</a>
+                <a class="nav-link active text-white" th:href="@{/transacciones}"><i class="bi bi-list-ul me-2"></i> Transacciones</a>
+                <a class="nav-link text-white" th:href="@{/documentos}"><i class="bi bi-file-earmark-text me-2"></i> Documentos</a>
+                <a class="nav-link text-white" th:href="@{/planes}"><i class="bi bi-star me-2"></i> Planes</a>
+            </nav>
+            <div class="mt-auto pt-5">
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn-outline-light w-100"><i class="bi bi-box-arrow-right me-2"></i> Salir</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-grow-1">
+            <nav class="navbar navbar-light bg-white border-bottom px-4">
+                <span class="navbar-brand mb-0 h1">Mis Transacciones</span>
+                <div class="d-flex align-items-center">
+                    <span class="me-3" th:text="${usuario.nombre}"></span>
+                    <div class="user-avatar"><span th:text="${#strings.substring(usuario.nombre, 0, 1)}"></span></div>
+                </div>
+            </nav>
+
+            <div class="content-area p-4">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevaTransaccionModal">
+                            <i class="bi bi-plus-circle me-2"></i> Nueva Transacción
+                        </button>
+                    </div>
+                </div>
+
+                <div th:if="${param.success}" class="alert alert-success">Transacción registrada exitosamente</div>
+                <div th:if="${param.deleted}" class="alert alert-info">Transacción eliminada</div>
+
+                <div class="card shadow-sm border-0 rounded-3">
+                    <div class="card-body">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Descripción</th>
+                                    <th>Monto</th>
+                                    <th>Fecha</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="t : ${transacciones}">
+                                    <td>
+                                        <span th:if="${t.tipo == 'INGRESO'}" class="badge bg-success">INGRESO</span>
+                                        <span th:if="${t.tipo == 'GASTO'}" class="badge bg-danger">GASTO</span>
+                                    </td>
+                                    <td th:text="${t.descripcion}"></td>
+                                    <td th:classappend="${t.tipo == 'INGRESO'} ? 'text-success' : 'text-danger'">
+                                        $<span th:text="${#numbers.formatDecimal(t.monto, 1, 'COMMA', 2, 'POINT')}"></span>
+                                    </td>
+                                    <td th:text="${#temporals.format(t.fechaTransaccion, 'dd/MM/yyyy HH:mm')}"></td>
+                                    <td>
+                                        <a th:href="@{/transacciones/eliminar/{id}(id=${t.id})}" class="btn btn-sm btn-outline-danger"
+                                           onclick="return confirm('¿Eliminar esta transacción?')">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(transacciones)}">
+                                    <td colspan="5" class="text-center text-muted">No hay transacciones registradas</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nueva Transacción -->
+    <div class="modal fade" id="nuevaTransaccionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/transacciones/crear}" th:object="${transaccion}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Nueva Transacción</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Tipo</label>
+                            <select class="form-select" th:field="*{tipo}" required>
+                                <option value="INGRESO">Ingreso</option>
+                                <option value="GASTO">Gasto</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Monto</label>
+                            <input type="number" step="0.01" class="form-control" th:field="*{monto}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Descripción</label>
+                            <textarea class="form-control" th:field="*{descripcion}" rows="3" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

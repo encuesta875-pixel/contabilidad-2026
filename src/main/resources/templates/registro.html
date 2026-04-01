@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Cuenta - Conta Pro</title>
+    <link rel="stylesheet" th:href="@{/css/purity/purity-main.css}">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .registro-container {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Left Side - Branding */
+        .registro-branding {
+            flex: 1;
+            background: linear-gradient(135deg, #1A8926 0%, #50E3C2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .registro-branding::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            top: -200px;
+            left: -200px;
+        }
+
+        .registro-branding::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            bottom: -100px;
+            right: -100px;
+        }
+
+        .branding-content {
+            position: relative;
+            z-index: 1;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .logo-large {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-large span {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #1A8926 0%, #50E3C2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .branding-title {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .branding-subtitle {
+            font-size: 18px;
+            opacity: 0.95;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .benefit-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .benefit-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .benefit-text {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Right Side - Form */
+        .registro-form-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            background: var(--bg-main);
+            overflow-y: auto;
+        }
+
+        .registro-form-wrapper {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .registro-form-header {
+            margin-bottom: 32px;
+        }
+
+        .registro-form-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .registro-form-subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .alert {
+            padding: 16px 20px;
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 24px;
+            font-size: 14px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .alert-danger {
+            background: rgba(208, 2, 27, 0.1);
+            color: var(--expense);
+            border: 1px solid var(--expense);
+        }
+
+        .registro-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-error {
+            color: var(--expense);
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        .form-hint {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .form-footer a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .form-footer a:hover {
+            color: var(--secondary-dark);
+        }
+
+        .btn-google:hover {
+            background: var(--bg-secondary) !important;
+            border-color: var(--secondary) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .registro-container {
+                flex-direction: column;
+            }
+
+            .registro-branding {
+                min-height: 40vh;
+                padding: 40px 20px;
+            }
+
+            .branding-title {
+                font-size: 32px;
+            }
+
+            .benefits-grid {
+                display: none;
+            }
+
+            .registro-form-container {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="registro-container">
+        <!-- Left Side - Branding -->
+        <div class="registro-branding">
+            <div class="branding-content">
+                <div class="logo-large">
+                    <span>CP</span>
+                </div>
+                <h1 class="branding-title">¡Bienvenido a Conta Pro!</h1>
+                <p class="branding-subtitle">
+                    Comienza tu prueba gratuita y descubre cómo simplificar la contabilidad de tu negocio en Colombia
+                </p>
+
+                <div class="benefits-grid">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">🚀</div>
+                        <div class="benefit-text">Inicio rápido en minutos</div>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon">💰</div>
+                        <div class="benefit-text">Control total de finanzas</div>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon">🤖</div>
+                        <div class="benefit-text">Asistente IA incluido</div>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon">📊</div>
+                        <div class="benefit-text">Reportes automáticos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Form -->
+        <div class="registro-form-container">
+            <div class="registro-form-wrapper">
+                <div class="registro-form-header">
+                    <h2 class="registro-form-title">Crear tu cuenta</h2>
+                    <p class="registro-form-subtitle">Completa el formulario para comenzar gratis</p>
+                </div>
+
+                <!-- Error Alert -->
+                <div th:if="${error}" class="alert alert-danger">
+                    <svg style="width: 20px; height: 20px; flex-shrink: 0;" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                    <span th:text="${error}">Error</span>
+                </div>
+
+                <!-- Google Sign In Button -->
+                <a th:href="@{/oauth2/authorization/google}" class="btn-google" style="display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 14px; background: white; border: 2px solid var(--border-color); border-radius: var(--border-radius-sm); font-size: 16px; font-weight: 600; color: var(--text-primary); text-decoration: none; transition: all 0.2s; margin-bottom: 24px;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19.8 10.2273C19.8 9.51819 19.7364 8.83637 19.6182 8.18182H10.2V12.05H15.5818C15.3273 13.3 14.5727 14.3591 13.4364 15.0682V17.5773H16.7364C18.7091 15.8364 19.8 13.2727 19.8 10.2273Z" fill="#4285F4"/>
+                        <path d="M10.2 20C12.9 20 15.1727 19.1045 16.7364 17.5773L13.4364 15.0682C12.4727 15.6682 11.2455 16.0227 10.2 16.0227C7.59545 16.0227 5.38182 14.2636 4.52727 11.9H1.11364V14.4909C2.66364 17.5591 6.19091 20 10.2 20Z" fill="#34A853"/>
+                        <path d="M4.52727 11.9C4.30909 11.3 4.18182 10.6591 4.18182 10C4.18182 9.34091 4.30909 8.7 4.52727 8.1V5.50909H1.11364C0.418182 6.89091 0 8.4 0 10C0 11.6 0.418182 13.1091 1.11364 14.4909L4.52727 11.9Z" fill="#FBBC05"/>
+                        <path d="M10.2 3.97727C11.3455 3.97727 12.3682 4.35909 13.1682 5.10909L16.0909 2.18636C15.1682 1.34091 12.9 0 10.2 0C6.19091 0 2.66364 2.44091 1.11364 5.50909L4.52727 8.1C5.38182 5.73636 7.59545 3.97727 10.2 3.97727Z" fill="#EA4335"/>
+                    </svg>
+                    Continuar con Google
+                </a>
+
+                <!-- Divider -->
+                <div style="display: flex; align-items: center; margin-bottom: 24px; gap: 12px;">
+                    <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+                    <span style="color: var(--text-secondary); font-size: 14px;">o registrarse con email</span>
+                    <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+                </div>
+
+                <!-- Registration Form -->
+                <form th:action="@{/registro}" th:object="${usuario}" method="post" class="registro-form">
+                    <div class="form-group">
+                        <label for="nombre" class="form-label">Nombre Completo *</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="nombre"
+                            th:field="*{nombre}"
+                            placeholder="Juan Pérez"
+                            required>
+                        <div th:if="${#fields.hasErrors('nombre')}" class="form-error">
+                            <span th:errors="*{nombre}">Error en nombre</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" class="form-label">Correo Electrónico *</label>
+                        <input
+                            type="email"
+                            class="form-control"
+                            id="email"
+                            th:field="*{email}"
+                            placeholder="tu@email.com"
+                            required
+                            autocomplete="email">
+                        <div th:if="${#fields.hasErrors('email')}" class="form-error">
+                            <span th:errors="*{email}">Error en email</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">Contraseña *</label>
+                        <input
+                            type="password"
+                            class="form-control"
+                            id="password"
+                            th:field="*{password}"
+                            placeholder="Mínimo 6 caracteres"
+                            required
+                            autocomplete="new-password">
+                        <div th:if="${#fields.hasErrors('password')}" class="form-error">
+                            <span th:errors="*{password}">Error en contraseña</span>
+                        </div>
+                        <div class="form-hint">
+                            Tu contraseña debe tener al menos 6 caracteres
+                        </div>
+                    </div>
+
+                    <div style="padding: 16px; background: rgba(74, 144, 226, 0.1); border-radius: var(--border-radius-sm); border-left: 4px solid var(--secondary);">
+                        <div style="font-size: 13px; color: var(--text-secondary);">
+                            Al crear una cuenta, aceptas nuestros términos de servicio y política de privacidad.
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 16px; padding: 14px;">
+                        Crear Cuenta Gratis
+                        <svg style="width: 20px; height: 20px;" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </form>
+
+                <div class="form-footer">
+                    <p style="color: var(--text-secondary); margin-bottom: 8px;">
+                        ¿Ya tienes cuenta?
+                    </p>
+                    <a th:href="@{/login}">Inicia sesión aquí →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

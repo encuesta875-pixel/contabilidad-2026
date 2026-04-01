@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Cuentas por Cobrar - Conta Pro')}"></head>
+<body>
+    <div class="main-container">
+        <div th:replace="~{fragments/layout :: sidebar}"></div>
+        <div class="content-wrapper">
+            <div class="content-main">
+                <div th:replace="~{fragments/layout :: navbar('Cuentas por Cobrar', 'Cartera / Por Cobrar')}"></div>
+
+                <div class="card" style="text-align: center; padding: 80px 40px;">
+                    <div style="width: 120px; height: 120px; margin: 0 auto 24px; border-radius: 50%; background: linear-gradient(135deg, #50E3C2 0%, #1A8926 100%); display: flex; align-items: center; justify-content: center;">
+                        <svg style="width: 60px; height: 60px; color: white;" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <h2 style="font-size: 28px; font-weight: 700; color: var(--primary); margin-bottom: 12px;">
+                        Cuentas por Cobrar
+                    </h2>
+                    <p style="font-size: 16px; color: var(--text-secondary); margin-bottom: 24px; max-width: 500px; margin-left: auto; margin-right: auto;">
+                        Control de facturas pendientes de clientes. Reporte de antigüedad de saldos y gestión de cobros.
+                    </p>
+                    <div style="display: inline-block; padding: 12px 24px; background: rgba(80, 227, 194, 0.1); color: var(--income); border-radius: var(--border-radius); font-weight: 600;">
+                        🚀 Próximamente disponible
+                    </div>
+                </div>
+
+                <div th:replace="~{fragments/layout :: footer}"></div>
+            </div>
+        </div>
+    </div>
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

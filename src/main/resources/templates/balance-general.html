@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Balance General - Conta Pro')}"></head>
+<body>
+    <div class="main-container">
+        <div th:replace="~{fragments/layout :: sidebar}"></div>
+        <div class="content-wrapper">
+            <div class="content-main">
+                <div th:replace="~{fragments/layout :: navbar('Balance General', 'Reportes / Balance General')}"></div>
+
+                <!-- Filtro de fecha -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <form method="get" action="/balance-general" style="display: flex; gap: 16px; align-items: end; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <label class="form-label">Fecha de Corte</label>
+                            <input type="date" name="fechaCorte" class="form-input"
+                                   th:value="${fechaCorte}" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <svg style="width: 18px; height: 18px; margin-right: 8px;" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+                            </svg>
+                            Consultar
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="exportarPDF()">
+                            <svg style="width: 18px; height: 18px; margin-right: 8px;" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586l-1.293-1.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V8z" clip-rule="evenodd"/>
+                            </svg>
+                            Exportar PDF
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Alerta de ecuación contable -->
+                <div th:if="${!ecuacionCuadrada}" class="card" style="margin-bottom: 24px; background: rgba(208, 2, 27, 0.1); border-left: 4px solid var(--expense);">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <svg style="width: 24px; height: 24px; color: var(--expense);" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                        <div>
+                            <div style="font-weight: 700; color: var(--expense); margin-bottom: 4px;">Ecuación Contable Descuadrada</div>
+                            <div style="font-size: 14px; color: var(--text-secondary);">
+                                El balance no cuadra. Activo ($<span th:text="${#numbers.formatDecimal(totalActivo, 1, 'COMMA', 0, 'POINT')}">0</span>)
+                                ≠ Pasivo + Patrimonio ($<span th:text="${#numbers.formatDecimal(totalPasivoMasPatrimonio, 1, 'COMMA', 0, 'POINT')}">0</span>)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Encabezado del Balance -->
+                <div class="card" style="margin-bottom: 24px; text-align: center; background: linear-gradient(135deg, rgba(0, 43, 73, 0.03) 0%, rgba(74, 144, 226, 0.03) 100%);">
+                    <h2 style="font-size: 24px; font-weight: 700; color: var(--primary); margin-bottom: 8px;">
+                        BALANCE GENERAL
+                    </h2>
+                    <p style="font-size: 16px; color: var(--text-secondary);">
+                        Al <span th:text="${#temporals.format(fechaCorte, 'dd \'de\' MMMM \'de\' yyyy')}">31 de diciembre de 2024</span>
+                    </p>
+                    <p style="font-size: 14px; color: var(--text-secondary); font-style: italic;">
+                        Valores expresados en Pesos Colombianos (COP)
+                    </p>
+                </div>
+
+                <!-- Resumen Ejecutivo -->
+                <div class="stats-grid" style="margin-bottom: 24px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                    <div class="card card-stat">
+                        <div class="card-stat-icon" style="background: rgba(80, 227, 194, 0.1);">
+                            <svg style="width: 24px; height: 24px; color: var(--income);" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="card-stat-label">Total Activo</div>
+                            <div class="card-stat-value text-income">
+                                $<span th:text="${#numbers.formatDecimal(totalActivo, 1, 'COMMA', 0, 'POINT')}">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-stat">
+                        <div class="card-stat-icon" style="background: rgba(208, 2, 27, 0.1);">
+                            <svg style="width: 24px; height: 24px; color: var(--expense);" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="card-stat-label">Total Pasivo</div>
+                            <div class="card-stat-value text-expense">
+                                $<span th:text="${#numbers.formatDecimal(totalPasivo, 1, 'COMMA', 0, 'POINT')}">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-stat">
+                        <div class="card-stat-icon" style="background: rgba(74, 144, 226, 0.1);">
+                            <svg style="width: 24px; height: 24px; color: var(--secondary);" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="card-stat-label">Total Patrimonio</div>
+                            <div class="card-stat-value" style="color: var(--secondary);">
+                                $<span th:text="${#numbers.formatDecimal(totalPatrimonio, 1, 'COMMA', 0, 'POINT')}">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card card-stat">
+                        <div class="card-stat-icon" style="background: rgba(245, 166, 35, 0.1);">
+                            <svg style="width: 24px; height: 24px; color: var(--warning);" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="card-stat-label">Resultado del Ejercicio</div>
+                            <div class="card-stat-value"
+                                 th:classappend="${resultadoEjercicio >= 0 ? 'text-income' : 'text-expense'}">
+                                $<span th:text="${#numbers.formatDecimal(resultadoEjercicio, 1, 'COMMA', 0, 'POINT')}">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Balance General en 2 columnas -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 24px;">
+
+                    <!-- ACTIVOS -->
+                    <div class="card">
+                        <h3 style="font-size: 18px; font-weight: 700; color: var(--income); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid var(--income);">
+                            ACTIVOS
+                        </h3>
+                        <table class="table" style="margin: 0;">
+                            <tbody>
+                                <tr th:each="cuenta : ${cuentasActivo}" th:if="${saldos.get(cuenta.id) != null && saldos.get(cuenta.id) != 0}">
+                                    <td>
+                                        <span class="badge badge-secondary" th:text="${cuenta.codigo}">1105</span>
+                                        <span th:text="${cuenta.nombre}" style="margin-left: 8px;">Caja General</span>
+                                    </td>
+                                    <td style="text-align: right; font-weight: 600; color: var(--income);">
+                                        $<span th:text="${#numbers.formatDecimal(saldos.get(cuenta.id), 1, 'COMMA', 0, 'POINT')}">0</span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(cuentasActivo)}">
+                                    <td colspan="2" style="text-align: center; color: var(--text-secondary); padding: 20px;">
+                                        No hay cuentas de activo configuradas
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr style="background: var(--bg-light); font-weight: 700;">
+                                    <td style="color: var(--income);">TOTAL ACTIVO</td>
+                                    <td style="text-align: right; color: var(--income);">
+                                        $<span th:text="${#numbers.formatDecimal(totalActivo, 1, 'COMMA', 0, 'POINT')}">0</span>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <!-- PASIVOS Y PATRIMONIO -->
+                    <div>
+                        <!-- PASIVOS -->
+                        <div class="card" style="margin-bottom: 16px;">
+                            <h3 style="font-size: 18px; font-weight: 700; color: var(--expense); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid var(--expense);">
+                                PASIVOS
+                            </h3>
+                            <table class="table" style="margin: 0;">
+                                <tbody>
+                                    <tr th:each="cuenta : ${cuentasPasivo}" th:if="${saldos.get(cuenta.id) != null && saldos.get(cuenta.id) != 0}">
+                                        <td>
+                                            <span class="badge badge-secondary" th:text="${cuenta.codigo}">2105</span>
+                                            <span th:text="${cuenta.nombre}" style="margin-left: 8px;">Proveedores</span>
+                                        </td>
+                                        <td style="text-align: right; font-weight: 600; color: var(--expense);">
+                                            $<span th:text="${#numbers.formatDecimal(saldos.get(cuenta.id), 1, 'COMMA', 0, 'POINT')}">0</span>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(cuentasPasivo)}">
+                                        <td colspan="2" style="text-align: center; color: var(--text-secondary); padding: 20px;">
+                                            No hay cuentas de pasivo configuradas
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr style="background: var(--bg-light); font-weight: 700;">
+                                        <td style="color: var(--expense);">TOTAL PASIVO</td>
+                                        <td style="text-align: right; color: var(--expense);">
+                                            $<span th:text="${#numbers.formatDecimal(totalPasivo, 1, 'COMMA', 0, 'POINT')}">0</span>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <!-- PATRIMONIO -->
+                        <div class="card">
+                            <h3 style="font-size: 18px; font-weight: 700; color: var(--secondary); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid var(--secondary);">
+                                PATRIMONIO
+                            </h3>
+                            <table class="table" style="margin: 0;">
+                                <tbody>
+                                    <tr th:each="cuenta : ${cuentasPatrimonio}" th:if="${saldos.get(cuenta.id) != null && saldos.get(cuenta.id) != 0}">
+                                        <td>
+                                            <span class="badge badge-secondary" th:text="${cuenta.codigo}">3105</span>
+                                            <span th:text="${cuenta.nombre}" style="margin-left: 8px;">Capital Social</span>
+                                        </td>
+                                        <td style="text-align: right; font-weight: 600; color: var(--secondary);">
+                                            $<span th:text="${#numbers.formatDecimal(saldos.get(cuenta.id), 1, 'COMMA', 0, 'POINT')}">0</span>
+                                        </td>
+                                    </tr>
+                                    <!-- Resultado del Ejercicio -->
+                                    <tr th:if="${resultadoEjercicio != 0}">
+                                        <td>
+                                            <span class="badge" style="background: var(--warning); color: white;">36</span>
+                                            <span style="margin-left: 8px; font-weight: 600;">Resultado del Ejercicio</span>
+                                        </td>
+                                        <td style="text-align: right; font-weight: 600;"
+                                            th:classappend="${resultadoEjercicio >= 0 ? 'text-income' : 'text-expense'}">
+                                            $<span th:text="${#numbers.formatDecimal(resultadoEjercicio, 1, 'COMMA', 0, 'POINT')}">0</span>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(cuentasPatrimonio) && resultadoEjercicio == 0}">
+                                        <td colspan="2" style="text-align: center; color: var(--text-secondary); padding: 20px;">
+                                            No hay cuentas de patrimonio configuradas
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr style="background: var(--bg-light); font-weight: 700;">
+                                        <td style="color: var(--secondary);">TOTAL PATRIMONIO</td>
+                                        <td style="text-align: right; color: var(--secondary);">
+                                            $<span th:text="${#numbers.formatDecimal(totalPasivoMasPatrimonio, 1, 'COMMA', 0, 'POINT')}">0</span>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Verificación de Ecuación Contable -->
+                <div class="card" th:classappend="${ecuacionCuadrada ? 'border-success' : 'border-danger'}"
+                     style="background: linear-gradient(135deg, rgba(0, 43, 73, 0.03) 0%, rgba(74, 144, 226, 0.03) 100%);">
+                    <div style="text-align: center;">
+                        <div th:if="${ecuacionCuadrada}" style="color: var(--success); margin-bottom: 8px;">
+                            <svg style="width: 32px; height: 32px; margin: 0 auto;" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <h4 style="font-size: 16px; font-weight: 700; margin-bottom: 12px;">Ecuación Contable Fundamental</h4>
+                        <div style="font-size: 20px; font-weight: 700; color: var(--primary);">
+                            <span>ACTIVO = PASIVO + PATRIMONIO</span>
+                        </div>
+                        <div style="font-size: 18px; margin-top: 12px; color: var(--text-secondary);">
+                            $<span th:text="${#numbers.formatDecimal(totalActivo, 1, 'COMMA', 0, 'POINT')}">0</span>
+                            <span th:text="${ecuacionCuadrada ? '=' : '≠'}">=</span>
+                            $<span th:text="${#numbers.formatDecimal(totalPasivoMasPatrimonio, 1, 'COMMA', 0, 'POINT')}">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:replace="~{fragments/layout :: footer}"></div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+
+    <script>
+        function exportarPDF() {
+            if (confirm('¿Desea exportar el Balance General a PDF?')) {
+                const fechaCorte = document.querySelector('input[name="fechaCorte"]').value;
+                window.location.href = `/balance-general/pdf?fechaCorte=${fechaCorte}`;
+            }
+        }
+    </script>
+</body>
+</html>

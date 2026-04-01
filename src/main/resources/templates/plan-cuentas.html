@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Plan de Cuentas - Conta Pro')}"></head>
+<body>
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div th:replace="~{fragments/layout :: sidebar}"></div>
+
+        <!-- Content Wrapper -->
+        <div class="content-wrapper">
+            <div class="content-main">
+                <!-- Navbar -->
+                <div th:replace="~{fragments/layout :: navbar('Plan de Cuentas', 'Contabilidad / Plan de Cuentas')}"></div>
+
+                <!-- Action Bar -->
+                <div class="card" style="margin-bottom: 24px; background: linear-gradient(135deg, #002B49 0%, #4A90E2 100%); color: white;">
+                    <div style="padding: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                        <div>
+                            <h3 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 700; color: white;">
+                                Catálogo de Cuentas Contables
+                            </h3>
+                            <p style="margin: 0; opacity: 0.9; font-size: 14px;">
+                                Gestiona tu plan de cuentas según el PUC de Colombia 🇨🇴
+                            </p>
+                        </div>
+                        <div style="display: flex; gap: 12px;">
+                            <button class="btn" onclick="openCreateModal()" style="background: white; color: #002B49; font-weight: 700;">
+                                <svg style="width: 20px; height: 20px;" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/>
+                                </svg>
+                                <span>Nueva Cuenta</span>
+                            </button>
+                            <form th:action="@{/plan-cuentas/inicializar}" method="post" style="display: inline;" onsubmit="return confirm('¿Desea crear el plan de cuentas inicial? Esta acción solo funciona si no tiene cuentas.')">
+                                <button type="submit" class="btn" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                                    <svg style="width: 20px; height: 20px;" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/>
+                                    </svg>
+                                    <span>Inicializar PUC</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messages -->
+                <div th:if="${success}" class="alert alert-success" style="margin-bottom: 24px;">
+                    <svg style="width: 20px; height: 20px; flex-shrink: 0;" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    <span th:text="${success}">Éxito</span>
+                </div>
+
+                <div th:if="${error}" class="alert alert-danger" style="margin-bottom: 24px;">
+                    <svg style="width: 20px; height: 20px; flex-shrink: 0;" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                    <span th:text="${error}">Error</span>
+                </div>
+
+                <!-- Filters -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <div style="padding: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                        <span style="font-weight: 600; color: var(--text-secondary);">Filtros:</span>
+                        <a th:href="@{/plan-cuentas}" class="badge" style="padding: 8px 16px; cursor: pointer;"
+                           th:classappend="${filtroTipo == null and filtroNivel == null} ? 'badge-info' : 'badge-secondary'">
+                            Todas
+                        </a>
+                        <a th:href="@{/plan-cuentas(tipo='ACTIVO')}" class="badge badge-income" style="padding: 8px 16px; cursor: pointer;">
+                            Activos
+                        </a>
+                        <a th:href="@{/plan-cuentas(tipo='PASIVO')}" class="badge badge-expense" style="padding: 8px 16px; cursor: pointer;">
+                            Pasivos
+                        </a>
+                        <a th:href="@{/plan-cuentas(tipo='PATRIMONIO')}" class="badge badge-info" style="padding: 8px 16px; cursor: pointer;">
+                            Patrimonio
+                        </a>
+                        <a th:href="@{/plan-cuentas(tipo='INGRESO')}" class="badge badge-success" style="padding: 8px 16px; cursor: pointer;">
+                            Ingresos
+                        </a>
+                        <a th:href="@{/plan-cuentas(tipo='GASTO')}" class="badge badge-warning" style="padding: 8px 16px; cursor: pointer;">
+                            Gastos
+                        </a>
+                        <div style="margin-left: auto; display: flex; gap: 8px;">
+                            <form th:action="@{/plan-cuentas/buscar}" method="get" style="display: flex; gap: 8px;">
+                                <input type="text" name="query" class="form-control" placeholder="Buscar por código o nombre..."
+                                       style="width: 250px; font-size: 14px; padding: 8px 12px;" th:value="${query}">
+                                <button type="submit" class="btn btn-secondary btn-sm">
+                                    <svg style="width: 16px; height: 16px;" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accounts Table -->
+                <div class="card">
+                    <div class="card-header d-flex justify-between align-center">
+                        <div>
+                            <h3 class="card-title">Catálogo de Cuentas</h3>
+                            <p class="card-subtitle">Plan de cuentas activo</p>
+                        </div>
+                        <span class="badge badge-info">
+                            <span th:text="${cuentas.size()}">0</span> cuentas
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Nombre</th>
+                                        <th>Tipo</th>
+                                        <th>Nivel</th>
+                                        <th>Naturaleza</th>
+                                        <th>Movimientos</th>
+                                        <th>Estado</th>
+                                        <th style="text-align: center;">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="cuenta : ${cuentas}">
+                                        <td>
+                                            <code style="background: var(--gray-50); padding: 4px 8px; border-radius: 4px; font-weight: 600;"
+                                                  th:text="${cuenta.codigo}">1105</code>
+                                        </td>
+                                        <td>
+                                            <div style="font-weight: 600; margin-bottom: 2px;" th:text="${cuenta.nombre}">Caja</div>
+                                            <div th:if="${cuenta.descripcion != null}"
+                                                 style="font-size: 12px; color: var(--text-secondary);"
+                                                 th:text="${cuenta.descripcion}">Descripción</div>
+                                        </td>
+                                        <td>
+                                            <span class="badge"
+                                                  th:classappend="${cuenta.tipo == 'ACTIVO'} ? 'badge-income' :
+                                                                 (${cuenta.tipo == 'PASIVO'} ? 'badge-expense' :
+                                                                 (${cuenta.tipo == 'PATRIMONIO'} ? 'badge-info' :
+                                                                 (${cuenta.tipo == 'INGRESO'} ? 'badge-success' : 'badge-warning')))"
+                                                  th:text="${cuenta.tipo}">TIPO</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-secondary" th:text="'Nivel ' + ${cuenta.nivel}">Nivel 1</span>
+                                        </td>
+                                        <td>
+                                            <span th:text="${cuenta.naturaleza}" style="font-weight: 500;">DEBITO</span>
+                                        </td>
+                                        <td style="text-align: center;">
+                                            <span th:if="${cuenta.aceptaMovimientos}"
+                                                  style="color: var(--success); font-weight: 600;">✓ Sí</span>
+                                            <span th:unless="${cuenta.aceptaMovimientos}"
+                                                  style="color: var(--text-secondary);">✗ No</span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${cuenta.activa}" class="badge badge-success">Activa</span>
+                                            <span th:unless="${cuenta.activa}" class="badge" style="background: var(--gray-200); color: var(--text-secondary);">Inactiva</span>
+                                        </td>
+                                        <td style="text-align: center;">
+                                            <a th:href="@{/plan-cuentas/eliminar/{id}(id=${cuenta.id})}"
+                                               class="btn btn-sm"
+                                               style="background: rgba(208, 2, 27, 0.1); color: var(--expense); padding: 6px 12px;"
+                                               onclick="return confirm('¿Eliminar esta cuenta? Solo se puede eliminar si no tiene subcuentas ni movimientos.')">
+                                                <svg style="width: 16px; height: 16px;" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                                </svg>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(cuentas)}">
+                                        <td colspan="8" style="text-align: center; padding: 60px 20px;">
+                                            <img th:src="@{/svg/document.svg}" alt="Sin cuentas" style="width: 64px; height: 64px; opacity: 0.2; margin-bottom: 16px;">
+                                            <div style="color: var(--text-secondary); font-size: 16px; margin-bottom: 8px;">
+                                                No hay cuentas registradas
+                                            </div>
+                                            <div style="color: var(--text-secondary); font-size: 14px; margin-bottom: 16px;">
+                                                Crea tu primera cuenta o inicializa el plan con el PUC de Colombia
+                                            </div>
+                                            <button onclick="openCreateModal()" class="btn btn-primary">
+                                                Crear Primera Cuenta
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div th:replace="~{fragments/layout :: footer}"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Create Account -->
+    <div id="createModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: var(--border-radius); max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto;">
+            <form th:action="@{/plan-cuentas/crear}" th:object="${planCuenta}" method="post">
+                <!-- Modal Header -->
+                <div style="padding: 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: var(--primary);">
+                        Nueva Cuenta Contable
+                    </h3>
+                    <button type="button" onclick="closeCreateModal()" style="background: none; border: none; cursor: pointer; padding: 8px;">
+                        <svg style="width: 24px; height: 24px;" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div style="padding: 24px; display: flex; flex-direction: column; gap: 20px;">
+                    <div class="grid grid-cols-2">
+                        <div class="form-group">
+                            <label class="form-label">Código *</label>
+                            <input type="text" class="form-control" th:field="*{codigo}" required placeholder="Ej: 1105">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Nivel *</label>
+                            <select class="form-control" th:field="*{nivel}" required>
+                                <option value="1">1 - Clase</option>
+                                <option value="2">2 - Grupo</option>
+                                <option value="3">3 - Cuenta</option>
+                                <option value="4">4 - Subcuenta</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" th:field="*{nombre}" required placeholder="Ej: Caja General">
+                    </div>
+
+                    <div class="grid grid-cols-2">
+                        <div class="form-group">
+                            <label class="form-label">Tipo *</label>
+                            <select class="form-control" th:field="*{tipo}" required>
+                                <option value="ACTIVO">Activo</option>
+                                <option value="PASIVO">Pasivo</option>
+                                <option value="PATRIMONIO">Patrimonio</option>
+                                <option value="INGRESO">Ingreso</option>
+                                <option value="GASTO">Gasto</option>
+                                <option value="COSTO">Costo</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Naturaleza *</label>
+                            <select class="form-control" th:field="*{naturaleza}" required>
+                                <option value="DEBITO">Débito</option>
+                                <option value="CREDITO">Crédito</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-control" th:field="*{descripcion}" rows="2" placeholder="Descripción opcional de la cuenta"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" th:field="*{aceptaMovimientos}" checked style="width: 18px; height: 18px;">
+                            <span>Acepta movimientos directos</span>
+                        </label>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px; margin-left: 26px;">
+                            Las cuentas de nivel 1 y 2 generalmente no aceptan movimientos
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div style="padding: 20px 24px; border-top: 1px solid var(--border-color); display: flex; gap: 12px; justify-content: flex-end;">
+                    <button type="button" onclick="closeCreateModal()" class="btn btn-secondary">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <svg style="width: 20px; height: 20px;" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                        <span>Crear Cuenta</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+
+    <script>
+        function openCreateModal() {
+            document.getElementById('createModal').style.display = 'flex';
+        }
+
+        function closeCreateModal() {
+            document.getElementById('createModal').style.display = 'none';
+        }
+
+        // Close modal on outside click
+        document.getElementById('createModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCreateModal();
+            }
+        });
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeCreateModal();
+            }
+        });
+    </script>
+</body>
+</html>

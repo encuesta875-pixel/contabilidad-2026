@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Asientos Contables - Conta Pro')}"></head>
+<body>
+    <div class="main-container">
+        <div th:replace="~{fragments/layout :: sidebar}"></div>
+
+        <div class="content-wrapper">
+            <div class="content-main">
+                <div th:replace="~{fragments/layout :: navbar('Asientos Contables', 'Contabilidad / Asientos')}"></div>
+
+                <!-- Action Bar -->
+                <div class="card" style="margin-bottom: 24px; background: linear-gradient(135deg, #002B49 0%, #4A90E2 100%); color: white;">
+                    <div style="padding: 24px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 700; color: white;">
+                                Registro de Asientos Contables
+                            </h3>
+                            <p style="margin: 0; opacity: 0.9; font-size: 14px;">
+                                Sistema de partida doble - Débito = Crédito
+                            </p>
+                        </div>
+                        <a th:href="@{/asientos/nuevo}" class="btn" style="background: white; color: #002B49; font-weight: 700;">
+                            <svg style="width: 20px; height: 20px;" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Nuevo Asiento</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Messages -->
+                <div th:if="${success}" class="alert alert-success" style="margin-bottom: 24px;">
+                    <span th:text="${success}">Éxito</span>
+                </div>
+                <div th:if="${error}" class="alert alert-danger" style="margin-bottom: 24px;">
+                    <span th:text="${error}">Error</span>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-3" style="margin-bottom: 24px;">
+                    <div class="card card-stat">
+                        <div class="card-stat-label">Total Asientos</div>
+                        <div class="card-stat-value text-primary" th:text="${asientos.size()}">0</div>
+                    </div>
+                    <div class="card card-stat">
+                        <div class="card-stat-label">Borradores</div>
+                        <div class="card-stat-value text-warning" th:text="${totalBorrador}">0</div>
+                    </div>
+                    <div class="card card-stat">
+                        <div class="card-stat-label">Contabilizados</div>
+                        <div class="card-stat-value text-success" th:text="${totalContabilizado}">0</div>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <div style="padding: 20px; display: flex; gap: 12px; align-items: center;">
+                        <span style="font-weight: 600;">Filtros:</span>
+                        <a th:href="@{/asientos}" class="badge badge-info" style="padding: 8px 16px;">Todos</a>
+                        <a th:href="@{/asientos(estado='BORRADOR')}" class="badge badge-warning" style="padding: 8px 16px;">Borradores</a>
+                        <a th:href="@{/asientos(estado='CONTABILIZADO')}" class="badge badge-success" style="padding: 8px 16px;">Contabilizados</a>
+                        <a th:href="@{/asientos(estado='ANULADO')}" class="badge badge-expense" style="padding: 8px 16px;">Anulados</a>
+                    </div>
+                </div>
+
+                <!-- Asientos Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Listado de Asientos</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Fecha</th>
+                                        <th>Concepto</th>
+                                        <th>Total Débito</th>
+                                        <th>Total Crédito</th>
+                                        <th>Estado</th>
+                                        <th>Cuadrado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="asiento : ${asientos}">
+                                        <td>
+                                            <code style="background: var(--gray-50); padding: 4px 8px; border-radius: 4px; font-weight: 600;"
+                                                  th:text="${asiento.numeroAsiento}">1</code>
+                                        </td>
+                                        <td th:text="${#temporals.format(asiento.fecha, 'dd/MM/yyyy')}">01/01/2024</td>
+                                        <td>
+                                            <div style="font-weight: 600;" th:text="${asiento.concepto}">Concepto</div>
+                                            <div th:if="${asiento.documentoReferencia}" style="font-size: 12px; color: var(--text-secondary);">
+                                                Ref: <span th:text="${asiento.documentoReferencia}"></span>
+                                            </div>
+                                        </td>
+                                        <td style="text-align: right; font-weight: 600; color: var(--income);">
+                                            $<span th:text="${#numbers.formatDecimal(asiento.totalDebito, 1, 'COMMA', 0, 'POINT')}">0</span>
+                                        </td>
+                                        <td style="text-align: right; font-weight: 600; color: var(--expense);">
+                                            $<span th:text="${#numbers.formatDecimal(asiento.totalCredito, 1, 'COMMA', 0, 'POINT')}">0</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge"
+                                                  th:classappend="${asiento.estado == 'BORRADOR'} ? 'badge-warning' :
+                                                                 (${asiento.estado == 'CONTABILIZADO'} ? 'badge-success' : 'badge-expense')"
+                                                  th:text="${asiento.estado}">ESTADO</span>
+                                        </td>
+                                        <td style="text-align: center;">
+                                            <span th:if="${asiento.cuadrado}" style="color: var(--success); font-weight: 700;">✓</span>
+                                            <span th:unless="${asiento.cuadrado}" style="color: var(--expense); font-weight: 700;">✗</span>
+                                        </td>
+                                        <td style="white-space: nowrap;">
+                                            <form th:if="${asiento.estado == 'BORRADOR' and asiento.cuadrado}"
+                                                  th:action="@{/asientos/contabilizar/{id}(id=${asiento.id})}"
+                                                  method="post" style="display: inline;"
+                                                  onsubmit="return confirm('¿Contabilizar este asiento? Esta acción no se puede deshacer.')">
+                                                <button type="submit" class="btn btn-sm" style="background: rgba(26, 137, 38, 0.1); color: var(--success);">
+                                                    ✓ Contabilizar
+                                                </button>
+                                            </form>
+                                            <a th:if="${asiento.estado == 'BORRADOR'}"
+                                               th:href="@{/asientos/eliminar/{id}(id=${asiento.id})}"
+                                               class="btn btn-sm" style="background: rgba(208, 2, 27, 0.1); color: var(--expense);"
+                                               onclick="return confirm('¿Eliminar este asiento?')">
+                                                Eliminar
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(asientos)}">
+                                        <td colspan="8" style="text-align: center; padding: 60px;">
+                                            <div style="color: var(--text-secondary);">No hay asientos registrados</div>
+                                            <a th:href="@{/asientos/nuevo}" class="btn btn-primary" style="margin-top: 16px;">
+                                                Crear Primer Asiento
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:replace="~{fragments/layout :: footer}"></div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

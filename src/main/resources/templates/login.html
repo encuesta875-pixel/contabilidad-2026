@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Conta Pro</title>
+    <link rel="stylesheet" th:href="@{/css/purity/purity-main.css}">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .login-container {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Left Side - Branding */
+        .login-branding {
+            flex: 1;
+            background: linear-gradient(135deg, #002B49 0%, #4A90E2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-branding::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            top: -200px;
+            right: -200px;
+        }
+
+        .login-branding::after {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            bottom: -100px;
+            left: -100px;
+        }
+
+        .branding-content {
+            position: relative;
+            z-index: 1;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .logo-large {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo-large span {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #002B49 0%, #4A90E2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .branding-title {
+            font-size: 42px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .branding-subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+            line-height: 1.6;
+            margin-bottom: 40px;
+        }
+
+        .branding-features {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            text-align: left;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+        }
+
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Right Side - Form */
+        .login-form-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+            background: var(--bg-main);
+        }
+
+        .login-form-wrapper {
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .login-form-header {
+            margin-bottom: 40px;
+        }
+
+        .login-form-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .login-form-subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .alert {
+            padding: 16px 20px;
+            border-radius: var(--border-radius-sm);
+            margin-bottom: 24px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-success {
+            background: rgba(26, 137, 38, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .alert-danger {
+            background: rgba(208, 2, 27, 0.1);
+            color: var(--expense);
+            border: 1px solid var(--expense);
+        }
+
+        .alert-info {
+            background: rgba(74, 144, 226, 0.1);
+            color: var(--secondary);
+            border: 1px solid var(--secondary);
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .form-footer a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .form-footer a:hover {
+            color: var(--secondary-dark);
+        }
+
+        .btn-google:hover {
+            background: var(--bg-secondary) !important;
+            border-color: var(--secondary) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .login-container {
+                flex-direction: column;
+            }
+
+            .login-branding {
+                min-height: 40vh;
+                padding: 40px 20px;
+            }
+
+            .branding-title {
+                font-size: 32px;
+            }
+
+            .branding-features {
+                display: none;
+            }
+
+            .login-form-container {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <!-- Left Side - Branding -->
+        <div class="login-branding">
+            <div class="branding-content">
+                <div class="logo-large">
+                    <span>CP</span>
+                </div>
+                <h1 class="branding-title">Conta Pro</h1>
+                <p class="branding-subtitle">
+                    La solución inteligente para la gestión contable de tu empresa en Colombia 🇨🇴
+                </p>
+
+                <div class="branding-features">
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <span>Control total de ingresos y gastos</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <span>Reportes automáticos en tiempo real</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <span>Asistente IA para consultas contables</span>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <span>Gestión de documentos digitales</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Form -->
+        <div class="login-form-container">
+            <div class="login-form-wrapper">
+                <div class="login-form-header">
+                    <h2 class="login-form-title">Bienvenido de vuelta</h2>
+                    <p class="login-form-subtitle">Ingresa tus credenciales para continuar</p>
+                </div>
+
+                <!-- Alerts -->
+                <div th:if="${error}" class="alert alert-danger">
+                    <svg style="width: 20px; height: 20px; flex-shrink: 0;" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                    <span th:text="${error}">Error</span>
+                </div>
+
+                <div th:if="${param.registered}" class="alert alert-success">
+                    <svg style="width: 20px; height: 20px; flex-shrink: 0;" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>¡Registro exitoso! Ahora puedes iniciar sesión</span>
+                </div>
+
+                <div th:if="${param.logout}" class="alert alert-info">
+                    <svg style="width: 20px; height: 20px; flex-shrink: 0;" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>Has cerrado sesión correctamente</span>
+                </div>
+
+                <!-- Google Sign In Button -->
+                <a th:href="@{/oauth2/authorization/google}" class="btn-google" style="display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 14px; background: white; border: 2px solid var(--border-color); border-radius: var(--border-radius-sm); font-size: 16px; font-weight: 600; color: var(--text-primary); text-decoration: none; transition: all 0.2s; margin-bottom: 24px;">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19.8 10.2273C19.8 9.51819 19.7364 8.83637 19.6182 8.18182H10.2V12.05H15.5818C15.3273 13.3 14.5727 14.3591 13.4364 15.0682V17.5773H16.7364C18.7091 15.8364 19.8 13.2727 19.8 10.2273Z" fill="#4285F4"/>
+                        <path d="M10.2 20C12.9 20 15.1727 19.1045 16.7364 17.5773L13.4364 15.0682C12.4727 15.6682 11.2455 16.0227 10.2 16.0227C7.59545 16.0227 5.38182 14.2636 4.52727 11.9H1.11364V14.4909C2.66364 17.5591 6.19091 20 10.2 20Z" fill="#34A853"/>
+                        <path d="M4.52727 11.9C4.30909 11.3 4.18182 10.6591 4.18182 10C4.18182 9.34091 4.30909 8.7 4.52727 8.1V5.50909H1.11364C0.418182 6.89091 0 8.4 0 10C0 11.6 0.418182 13.1091 1.11364 14.4909L4.52727 11.9Z" fill="#FBBC05"/>
+                        <path d="M10.2 3.97727C11.3455 3.97727 12.3682 4.35909 13.1682 5.10909L16.0909 2.18636C15.1682 1.34091 12.9 0 10.2 0C6.19091 0 2.66364 2.44091 1.11364 5.50909L4.52727 8.1C5.38182 5.73636 7.59545 3.97727 10.2 3.97727Z" fill="#EA4335"/>
+                    </svg>
+                    Continuar con Google
+                </a>
+
+                <!-- Divider -->
+                <div style="display: flex; align-items: center; margin-bottom: 24px; gap: 12px;">
+                    <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+                    <span style="color: var(--text-secondary); font-size: 14px;">o iniciar sesión con email</span>
+                    <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
+                </div>
+
+                <!-- Login Form -->
+                <form th:action="@{/login}" method="post" class="login-form">
+                    <div class="form-group">
+                        <label for="username" class="form-label">Correo Electrónico</label>
+                        <input
+                            type="email"
+                            class="form-control"
+                            id="username"
+                            name="username"
+                            placeholder="tu@email.com"
+                            required
+                            autocomplete="email">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input
+                            type="password"
+                            class="form-control"
+                            id="password"
+                            name="password"
+                            placeholder="••••••••"
+                            required
+                            autocomplete="current-password">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 16px; padding: 14px;">
+                        Iniciar Sesión
+                        <svg style="width: 20px; height: 20px;" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </form>
+
+                <div class="form-footer">
+                    <p style="color: var(--text-secondary); margin-bottom: 8px;">
+                        ¿No tienes cuenta?
+                    </p>
+                    <a th:href="@{/registro}">Regístrate gratis →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

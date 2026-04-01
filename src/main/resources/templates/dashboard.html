@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Dashboard - Contabilidad')}"></head>
+<body>
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div th:replace="~{fragments/layout :: sidebar}"></div>
+
+        <!-- Content Wrapper -->
+        <div class="content-wrapper">
+            <div class="content-main">
+                <!-- Navbar -->
+                <div th:replace="~{fragments/layout :: navbar('Dashboard', 'Inicio / Dashboard')}"></div>
+
+                <!-- Welcome Section -->
+                <div class="card" style="background: linear-gradient(135deg, #002B49 0%, #4A90E2 100%); color: white;">
+                    <div style="padding: 32px;">
+                        <h2 style="margin-bottom: 8px; font-weight: 700;">
+                            Bienvenido, <span th:text="${usuario.nombre}">Usuario</span>!
+                        </h2>
+                        <p style="opacity: 0.9; font-size: 16px;">
+                            Resumen de tu actividad financiera en tiempo real - Colombia 🇨🇴
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-3">
+                    <!-- Total Ingresos -->
+                    <div class="card card-stat">
+                        <div class="d-flex justify-between align-center">
+                            <div>
+                                <div class="card-stat-label">Total Ingresos</div>
+                                <div class="card-stat-value text-income">
+                                    $<span th:text="${#numbers.formatDecimal(totalIngresos, 1, 'COMMA', 0, 'POINT')}">0</span>
+                                    <span style="font-size: 14px; font-weight: 500; color: var(--text-secondary);"> COP</span>
+                                </div>
+                                <div class="card-stat-change" style="color: var(--income);">
+                                    <svg style="width: 16px; height: 16px;" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span>Ingresos del período</span>
+                                </div>
+                            </div>
+                            <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(80, 227, 194, 0.15); display: flex; align-items: center; justify-content: center;">
+                                <img th:src="@{/svg/wallet.svg}" alt="Ingresos" style="width: 30px; height: 30px; opacity: 0.8;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Gastos -->
+                    <div class="card card-stat">
+                        <div class="d-flex justify-between align-center">
+                            <div>
+                                <div class="card-stat-label">Total Gastos</div>
+                                <div class="card-stat-value text-expense">
+                                    $<span th:text="${#numbers.formatDecimal(totalGastos, 1, 'COMMA', 0, 'POINT')}">0</span>
+                                    <span style="font-size: 14px; font-weight: 500; color: var(--text-secondary);"> COP</span>
+                                </div>
+                                <div class="card-stat-change" style="color: var(--expense);">
+                                    <svg style="width: 16px; height: 16px;" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M14.707 12.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 14.586V3a1 1 0 012 0v11.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span>Gastos del período</span>
+                                </div>
+                            </div>
+                            <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(208, 2, 27, 0.15); display: flex; align-items: center; justify-content: center;">
+                                <img th:src="@{/svg/credit.svg}" alt="Gastos" style="width: 30px; height: 30px; opacity: 0.8;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Balance -->
+                    <div class="card card-stat">
+                        <div class="d-flex justify-between align-center">
+                            <div>
+                                <div class="card-stat-label">Balance Total</div>
+                                <div class="card-stat-value" th:classappend="${balance >= 0} ? 'text-income' : 'text-expense'">
+                                    $<span th:text="${#numbers.formatDecimal(balance, 1, 'COMMA', 0, 'POINT')}">0</span>
+                                    <span style="font-size: 14px; font-weight: 500; color: var(--text-secondary);"> COP</span>
+                                </div>
+                                <div class="card-stat-change" th:style="${balance >= 0} ? 'color: var(--income);' : 'color: var(--expense);'">
+                                    <span th:text="${balance >= 0} ? 'Balance positivo' : 'Balance negativo'">Balance</span>
+                                </div>
+                            </div>
+                            <div th:style="${balance >= 0} ? 'width: 60px; height: 60px; border-radius: 50%; background: rgba(80, 227, 194, 0.15); display: flex; align-items: center; justify-content: center;' : 'width: 60px; height: 60px; border-radius: 50%; background: rgba(208, 2, 27, 0.15); display: flex; align-items: center; justify-content: center;'">
+                                <img th:src="@{/svg/stats.svg}" alt="Balance" style="width: 30px; height: 30px; opacity: 0.8;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Cards -->
+                <div class="grid grid-cols-2">
+                    <!-- Acciones Rápidas -->
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="d-flex align-center gap-2">
+                                <img th:src="@{/svg/rocket.svg}" alt="Acciones" style="width: 24px; height: 24px;">
+                                <h3 class="card-title">Acciones Rápidas</h3>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
+                                <a th:href="@{/chat}" class="btn btn-secondary" style="width: 100%; justify-content: flex-start;">
+                                    <img th:src="@{/svg/help.svg}" alt="Chat" style="width: 20px; height: 20px;">
+                                    <span>Iniciar Chat con IA</span>
+                                </a>
+                                <a th:href="@{/transacciones}" class="btn btn-secondary" style="width: 100%; justify-content: flex-start;">
+                                    <img th:src="@{/svg/credit.svg}" alt="Transacción" style="width: 20px; height: 20px;">
+                                    <span>Nueva Transacción</span>
+                                </a>
+                                <a th:href="@{/documentos}" class="btn btn-secondary" style="width: 100%; justify-content: flex-start;">
+                                    <img th:src="@{/svg/document.svg}" alt="Documento" style="width: 20px; height: 20px;">
+                                    <span>Subir Documento</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Premium Card -->
+                    <div class="card" style="background: linear-gradient(135deg, #002B49 0%, #4A90E2 100%); color: white;">
+                        <div class="card-header" style="border-bottom-color: rgba(255,255,255,0.2);">
+                            <div class="d-flex align-center gap-2">
+                                <img th:src="@{/svg/rocket.svg}" alt="Premium" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
+                                <h3 class="card-title" style="color: white;">¿Necesitas más funciones?</h3>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p style="margin-bottom: 20px; opacity: 0.9; line-height: 1.6;">
+                                Descubre nuestros planes premium con funcionalidades avanzadas como reportes detallados, exportación de datos, y mucho más.
+                            </p>
+                            <a th:href="@{/planes}" class="btn" style="background: white; color: #002B49; font-weight: 700;">
+                                <span>Ver Planes Premium</span>
+                                <svg style="width: 16px; height: 16px;" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Table -->
+                <div class="card">
+                    <div class="card-header d-flex justify-between align-center">
+                        <div>
+                            <h3 class="card-title">Actividad Reciente</h3>
+                            <p class="card-subtitle">Últimas transacciones registradas</p>
+                        </div>
+                        <a th:href="@{/transacciones}" class="btn btn-primary btn-sm">Ver Todas</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container" th:if="${ultimasTransacciones != null and !ultimasTransacciones.isEmpty()}">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Descripción</th>
+                                        <th>Categoría</th>
+                                        <th>Tipo</th>
+                                        <th style="text-align: right;">Monto (COP)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="trans : ${ultimasTransacciones}">
+                                        <td th:text="${#temporals.format(trans.fechaTransaccion, 'dd/MM/yyyy')}">01/01/2024</td>
+                                        <td th:text="${trans.descripcion}">Descripción</td>
+                                        <td>
+                                            <span class="badge badge-info" th:text="${trans.categoria != null ? trans.categoria : 'Sin categoría'}">Categoría</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge"
+                                                  th:classappend="${trans.tipo == 'INGRESO'} ? 'badge-income' : 'badge-expense'"
+                                                  th:text="${trans.tipo}">TIPO</span>
+                                        </td>
+                                        <td style="text-align: right; font-weight: 600;"
+                                            th:classappend="${trans.tipo == 'INGRESO'} ? 'text-income' : 'text-expense'">
+                                            $<span th:text="${#numbers.formatDecimal(trans.monto, 1, 'COMMA', 0, 'POINT')}">0</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div th:if="${ultimasTransacciones == null or ultimasTransacciones.isEmpty()}"
+                             style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                            <img th:src="@{/svg/document.svg}" alt="Sin datos" style="width: 48px; height: 48px; opacity: 0.3; margin-bottom: 16px;">
+                            <p style="margin: 0;">No hay transacciones recientes</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div th:replace="~{fragments/layout :: footer}"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

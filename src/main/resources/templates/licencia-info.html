@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Información de Licencia - ContaPro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-key me-2"></i>
+                            Estado de Licencia
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Error Message -->
+                        <div th:if="${error}" class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <span th:text="${error}"></span>
+                        </div>
+
+                        <!-- Estado de la Licencia -->
+                        <div th:if="${estado}">
+                            <div th:if="${estado.valida}" class="alert alert-success" role="alert">
+                                <h5 class="alert-heading">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    Licencia Activa
+                                </h5>
+                                <p class="mb-0" th:text="${estado.mensaje}"></p>
+                            </div>
+
+                            <div th:unless="${estado.valida}" class="alert alert-danger" role="alert">
+                                <h5 class="alert-heading">
+                                    <i class="fas fa-times-circle me-2"></i>
+                                    Licencia Inválida
+                                </h5>
+                                <p class="mb-0" th:text="${estado.mensaje}"></p>
+                            </div>
+                        </div>
+
+                        <!-- Información Detallada de la Licencia -->
+                        <div th:if="${licencia}" class="mt-4">
+                            <h5 class="mb-3">Detalles de la Licencia</h5>
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th width="40%">Fecha de Inicio</th>
+                                        <td>
+                                            <span th:text="${#temporals.format(licencia.fechaInicio, 'dd/MM/yyyy HH:mm:ss')}"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Fecha de Expiración</th>
+                                        <td>
+                                            <span th:text="${#temporals.format(licencia.fechaExpiracion, 'dd/MM/yyyy HH:mm:ss')}"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Días Restantes</th>
+                                        <td>
+                                            <span th:text="${licencia.diasRestantes}"></span> días
+                                            <div class="progress mt-2" style="height: 25px;">
+                                                <div class="progress-bar"
+                                                     role="progressbar"
+                                                     th:style="'width: ' + ${(licencia.diasRestantes / 7.0) * 100} + '%'"
+                                                     th:classappend="${licencia.diasRestantes <= 2} ? 'bg-danger' : (${licencia.diasRestantes <= 4} ? 'bg-warning' : 'bg-success')">
+                                                    <span th:text="${licencia.diasRestantes} + ' / 7 días'"></span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Estado</th>
+                                        <td>
+                                            <span th:if="${licencia.activa && !licencia.bloqueada}" class="badge bg-success">
+                                                <i class="fas fa-check-circle me-1"></i>Activa
+                                            </span>
+                                            <span th:if="${!licencia.activa}" class="badge bg-secondary">
+                                                <i class="fas fa-ban me-1"></i>Inactiva
+                                            </span>
+                                            <span th:if="${licencia.bloqueada}" class="badge bg-danger">
+                                                <i class="fas fa-lock me-1"></i>Bloqueada
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${licencia.bloqueada}">
+                                        <th>Motivo de Bloqueo</th>
+                                        <td>
+                                            <span class="text-danger" th:text="${licencia.motivoBloqueo}"></span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Dirección MAC</th>
+                                        <td>
+                                            <code th:text="${licencia.macAddress}"></code>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Mensaje si no hay licencia -->
+                        <div th:unless="${licencia}" class="alert alert-info mt-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            No hay licencia de prueba registrada para este dispositivo.
+                        </div>
+
+                        <!-- Botones de Acción -->
+                        <div class="mt-4 d-flex gap-2">
+                            <a href="/dashboard" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Volver
+                            </a>
+                            <a href="/planes" class="btn btn-primary">
+                                <i class="fas fa-shopping-cart me-2"></i>Ver Planes
+                            </a>
+                            <button onclick="verificarEstado()" class="btn btn-info">
+                                <i class="fas fa-sync-alt me-2"></i>Actualizar Estado
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información Adicional -->
+                <div class="card shadow mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-question-circle me-2"></i>
+                            Información sobre el Período de Prueba
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                El período de prueba es de <strong>7 días</strong>
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                La licencia está vinculada a este dispositivo
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Acceso completo a todas las funcionalidades
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-info-circle text-primary me-2"></i>
+                                Una vez expirada, deberá adquirir una suscripción
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function verificarEstado() {
+            fetch('/licencia/estado')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.valida) {
+                        alert('Licencia válida: ' + data.mensaje);
+                    } else {
+                        alert('Licencia inválida: ' + data.mensaje);
+                    }
+                    location.reload();
+                })
+                .catch(error => {
+                    alert('Error al verificar el estado: ' + error);
+                });
+        }
+    </script>
+</body>
+</html>
