@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: conta-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Panama507-
+      MYSQL_DATABASE: conta_db
+      MYSQL_USER: conta_user
+      MYSQL_PASSWORD: conta_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - conta-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Spring Boot Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: conta-app
+    environment:
+      - PORT=8080
+      - DATABASE_URL=jdbc:mysql://mysql:3306/conta_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - DATABASE_USERNAME=conta_user
+      - DATABASE_PASSWORD=conta_password
+      - SPRING_PROFILES_ACTIVE=prod
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - conta-network
+
+volumes:
+  mysql_data:
+
+networks:
+  conta-network:
+    driver: bridge

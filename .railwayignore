@@ -1,0 +1,12 @@
+# Railway ignore file
+.git/
+.mvn/
+target/
+bin/
+.vscode/
+.idea/
+*.log
+*.iml
+.DS_Store
+purity-ui-dashboard-main/node_modules/
+purity-ui-dashboard-main/build/
